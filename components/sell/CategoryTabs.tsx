@@ -1,4 +1,4 @@
-//  — เปลี่ยนคอลัมน์ขวาผ่าน URL
+// components/sell/CategoryTabs.tsx — เปลี่ยนคอลัมน์ขวาผ่าน URL
 const router = useRouter();
 const cat = useSearchParams().get("cat") ?? "all";
 
