@@ -1,0 +1,4 @@
+npx create-next-app@latest POSforsale --ts --tailwind --app --src-dir=false --eslint
+cd POSforsale
+npm i @supabase/supabase-js @supabase/ssr zustand lucide-react clsx tailwind-merge
+npm i -D supabase
