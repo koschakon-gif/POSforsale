@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A78B5">
+<link rel="manifest" href="manifest.webmanifest">
+<script>(function(){var h=location.hash,c=document.documentElement.classList;if(/^#t[1-6]$/.test(h))c.add('cm');else if(h==='#admin')c.add('am')})()</script>
+<title>Blue House Café POS v1.0</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Sarabun:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#ECEAE6;--surf:#FBFAF8;--ink:#1F2326;--mute:#62676B;--line:#D9D6D1;--blue:#0A78B5;--bink:#FFFFFF;--wood:#0A78B5;--free:#2F8F5B;--busy:#B4441F;--soft:#DCEBF5}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1215;--surf:#161C21;--ink:#EAEEF1;--mute:#98A3AB;--line:#26303A;--blue:#5DB8EA;--bink:#06202F;--wood:#7CC4EE;--free:#4FBF86;--busy:#E8845F;--soft:#17303F}}
+:root[data-theme="dark"]{--bg:#0E1215;--surf:#161C21;--ink:#EAEEF1;--mute:#98A3AB;--line:#26303A;--blue:#5DB8EA;--bink:#06202F;--wood:#7CC4EE;--free:#4FBF86;--busy:#E8845F;--soft:#17303F}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Sarabun,"Noto Sans Thai",system-ui,sans-serif;font-size:16px;user-select:none;-webkit-user-select:none}
+button,input{font:inherit;color:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--wood);outline-offset:2px}
+#app{height:100%;display:flex;flex-direction:column}
+header{flex:none;display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--surf);color:var(--blue);border-bottom:1px solid var(--line)}
+.brand b{font-family:"Playfair Display",Georgia,serif;font-size:22px}
+.brand small{margin-left:10px;font-size:13px;opacity:.85}
+header button{background:transparent;border:1.5px solid currentColor;border-radius:10px;padding:0 14px;min-height:44px}
+main{flex:1;min-height:0;display:grid;grid-template-columns:152px 1fr 370px;gap:10px;padding:10px}
+.panel{display:flex;flex-direction:column;min-height:0;overflow:hidden;background:var(--surf);border:1px solid var(--line);border-radius:12px}
+#tables{display:grid;gap:8px;padding:10px;align-content:start;overflow:auto}
+.tb{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:64px;padding:10px 12px;border:1px solid var(--line);border-left:6px solid var(--free);border-radius:10px;background:var(--surf)}
+.tb.busy{border-left-color:var(--busy)}
+.tb.sel{background:var(--soft);outline:2px solid var(--blue)}
+.tb span{font-size:14px;color:var(--mute)}
+#cats,#cCats{flex:none;display:flex;gap:8px;padding:10px;overflow-x:auto}
+.chip{flex:none;min-height:44px;padding:0 16px;border-radius:22px;border:1px solid var(--line);background:var(--surf)}
+.chip.on{background:var(--blue);color:var(--bink);border-color:var(--blue)}
+#items,#cItems{flex:1;overflow:auto;padding:0 10px 10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px;align-content:start}
+.it{position:relative;min-height:86px;padding:10px;text-align:center;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--surf);display:flex;flex-direction:column;justify-content:space-between}
+.it small{color:var(--wood);font-weight:700;font-size:15px}
+.it i{position:absolute;top:6px;right:6px;min-width:24px;height:24px;padding:0 6px;border-radius:12px;background:var(--blue);color:var(--bink);font-style:normal;font-size:14px;line-height:24px;text-align:center}
+#billhead{flex:none;display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
+#billhead b{font-size:19px}
+.ghost{min-height:40px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:transparent}
+#lines{flex:1;overflow:auto;padding:4px 12px}
+.ln{display:grid;grid-template-columns:1fr auto 72px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.ln small{display:block;color:var(--mute)}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--surf);font-size:22px}
+.qty b{min-width:22px;text-align:center}
+.lt{text-align:right;font-weight:600}
+.empty{padding:28px 8px;text-align:center;color:var(--mute)}
+#totals{flex:none;display:grid;gap:8px;padding:12px;border-top:1px solid var(--line)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips .chip{min-height:40px;padding:0 12px}
+.net{font-size:30px;font-weight:700}
+.go{min-height:58px;border:0;border-radius:12px;background:var(--blue);color:var(--bink);font-size:20px;font-weight:700;width:100%}
+.go:disabled{opacity:.4}
+.in{width:100%;min-height:54px;padding:0 12px;font-size:24px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+#cats select,#cats input,#cCats select,#cCats input{min-height:46px;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:0 12px;font-size:16px}
+#cats select,#cCats select{flex:none;font-weight:700}#cats input,#cCats input{flex:1;min-width:0}
+input{user-select:text;-webkit-user-select:text}
+.hb{display:flex;gap:8px}
+#qn{font-style:normal;background:var(--blue);color:var(--bink);border-radius:10px;padding:0 7px;margin-left:6px;font-size:13px}#qn:empty{display:none}
+#cust{display:none;flex-direction:column;height:100%}.cm #app{display:none}.cm #cust{display:flex}
+#cItems{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));padding-top:10px}
+#cBar{flex:none;margin:10px;width:calc(100% - 20px)}
+.qrs{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+.qc{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:#000}
+.qq{min-height:150px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13px}
+@media (max-width:899px){header{flex-wrap:wrap;gap:6px}header button{padding:0 10px;font-size:14px;min-height:40px}.brand small{display:none}}
+@media (min-width:1400px){
+ body{font-size:18px}
+ main{grid-template-columns:200px 1fr 470px}
+ #items{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+ .it{min-height:108px;font-size:18px}.it small{font-size:17px}
+ .tb{min-height:80px}.chip{min-height:50px}.go{min-height:68px}.ln{padding:12px 0}
+ .qty button{width:48px;height:48px}.net{font-size:34px}
+}
+#adm{display:none;flex-direction:column;height:100%}.am #app,.am #cust{display:none}.am #adm{display:flex}
+#aBody{flex:1;overflow:auto;padding:10px;max-width:760px;width:100%;margin:0 auto}
+.ar{display:flex;align-items:center;gap:10px;width:100%;padding:8px;margin-bottom:6px;border:1px solid var(--line);border-radius:10px;background:var(--surf);text-align:left}
+.ar .th{flex:none;width:52px;height:52px;border-radius:8px;background:var(--soft);overflow:hidden}
+.ar .th img,.ph2 img{width:100%;height:100%;object-fit:cover;display:block}
+.ar .nm{flex:1}.ar b{color:var(--wood)}
+.ah{margin:14px 0 6px;color:var(--mute);font-weight:700}
+.ph2{height:160px;border-radius:10px;background:var(--soft);display:flex;align-items:center;justify-content:center;color:var(--mute);overflow:hidden;margin:10px 0}
+.fl{display:inline-flex;align-items:center;cursor:pointer}
+.sheet .in{margin:6px 0;font-size:17px}
+.it.im{padding:0;overflow:hidden;justify-content:flex-end;min-height:124px;color:#fff}
+.it.im .ph{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
+.it.im span,.it.im small{position:relative;width:100%;padding:3px 8px;background:rgba(10,20,28,.62);color:#fff}
+.it.im i{z-index:2}
+@media (min-width:1400px){.it.im{min-height:150px}}
+@media print{body>*:not(#modal){display:none!important}.ov{position:static;display:block;background:none}.sheet{max-width:none;max-height:none;overflow:visible;padding:0;background:#fff}.sheet>*:not(.qrs){display:none}}
+.dine{padding:8px 0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.go.alt{background:transparent;color:var(--blue);border:2px solid var(--blue)}
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:22px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+#tabs{display:none;flex:none;background:var(--surf);border-top:1px solid var(--line)}
+#tabs button{flex:1;min-height:58px;border:0;background:transparent;font-size:16px}
+#tabs .on{color:var(--blue);font-weight:700;box-shadow:inset 0 3px var(--blue)}
+.ov{position:fixed;top:0;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5)}
+.sheet{width:100%;max-width:480px;max-height:92%;overflow:auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));background:var(--surf);border-radius:16px 16px 0 0}
+.sheet p{margin:8px 0;color:var(--mute)}
+.rc{display:flex;justify-content:space-between;padding:4px 0}
+.hr{border-top:1px dashed var(--line);margin:8px 0}
+@media (min-width:900px){.ov{align-items:center}.sheet{border-radius:16px}}
+@media (max-width:899px){
+ main{grid-template-columns:1fr}
+ .panel:not(.on){display:none}
+ #tabs{display:flex}
+ #tables{grid-template-columns:repeat(2,1fr)}
+ #items{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+}
+</style>
+</head>
+<body>
+<div id="app">
+ <header><div class="brand"><b>Blue House Café</b><small>POS v1.0</small></div><div class="hb"><button id="bQr">ออเดอร์ QR<i id="qn"></i></button><button id="bGen">QR โต๊ะ</button><button id="bSum">ยอดวันนี้</button><button id="bAdm">จัดการเมนู</button></div></header>
+ <main>
+  <section class="panel" id="p-tables"><div id="tables"></div></section>
+  <section class="panel" id="p-menu"><div id="cats"><select id="catSel" aria-label="หมวด"></select><input id="q" type="search" placeholder="ค้นหาเมนู"></div><div id="items"></div></section>
+  <section class="panel" id="p-bill"><div id="billhead"></div><div id="lines"></div><div id="totals"></div></section>
+ </main>
+ <nav id="tabs"><button data-p="tables">โต๊ะ</button><button data-p="menu">เมนู</button><button data-p="bill">บิล</button></nav>
+ </div>
+<div id="cust"><header><div class="brand"><b>Blue House Café</b></div><b id="cT"></b></header>
+ <div id="cCats"><select id="cSel" aria-label="หมวด"></select><input id="cQ" type="search" placeholder="ค้นหาเมนู"></div>
+ <div id="cItems"></div><button class="go" id="cBar" disabled></button></div>
+<div id="adm"><header><div class="brand"><b>จัดการเมนู</b></div><button id="aBack">กลับ POS</button></header><div id="aBody"></div></div>
+<div id="toast"></div><div id="modal"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// ===== เมนูตัวอย่าง: แก้ชื่อ/ราคาตรงนี้ได้เลย [หมวด, ชื่อ, ราคา] =====
+const SWEET=['ไม่หวาน','หวานน้อย','ปกติ','หวานมาก'];
+// เมนูสำรองในไฟล์ (ใช้เมื่อโหลด menu.json ไม่ได้) แก้เมนูจริงที่ไฟล์ menu.json
+const DEF={"cats":["กาแฟ","มัทฉะ","ขนม","อื่นๆ"],"items":[["m01",0,"aerocano",75],["m02",0,"coconut latte",90],["m03",0,"dirty",85],["m04",0,"Einspanner latte",90],["m05",0,"flatwhite",75],["m06",0,"กาแฟซิง",80],["m07",0,"กาแฟน้ำส้มสด",85],["m08",0,"กาแฟพีช",85],["m09",0,"กาแฟมะพร้าว",85],["m10",0,"กาแฟมะพร้าวปั่น",90],["m11",0,"กาแฟมิ๊กเบอร์รี่",90],["m12",1,"Blue matcha latte",95],["m13",1,"Einspanner matcha latte",105],["m14",1,"Matcha",75],["m15",1,"yame",95],["m16",1,"บลูเบอร์รี่มัทฉะ",95],["m17",1,"มัทฉะส้มสด",90],["m18",1,"มัทฉะคาราเมล",90],["m19",1,"มัทฉะถั่วแดง",85],["m20",1,"มัทฉะน้ำผึ้ง",85],["m21",1,"มัทฉะน้ำผึ้งมะนาว",90],["m22",1,"มัทฉะน้ำมะพร้าว",90],["m23",1,"มัทฉะมะพร้าวปั่น",95],["m24",1,"มัทฉะยูสุ",90],["m25",1,"มัทฉะลาเต้",85],["m26",1,"มัทฉะลาเต้ (นมโอ๊ต)",95],["m27",1,"มัทฉะสตรอว์เบอร์รี่",95],["m28",1,"มัทฉะโกโก้",90],["m29",1,"เพียวมัทฉะ",80],["m30",1,"โฟมมัทฉะน้ำมะพร้าว",95],["m31",1,"ไฮจิฉะ",85],["m32",2,"chocolate cake",90],["m33",2,"New york cheesecake",95],["m34",2,"กล้วยหนีบธัญพืช",60],["m35",2,"กล้วยหนีบนูเทลล่า",65],["m36",3,"นมสด",50],["m37",3,"ชาใต้",55]]};
+let CATS=[],MENU=[],MX={};
+const MI=id=>MX[id];
+function setMenu(j){CATS=j.cats;MENU=j.items.map(x=>({id:String(x[0]),c:+x[1],n:String(x[2]).replace(/[<>]/g,'').replace(/&/g,'&amp;'),p:+x[3],img:String(x[4]||'')}));MX={};MENU.forEach(m=>MX[m.id]=m)}
+setMenu(DEF);
+// ===== ระบบ =====
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const K='bhc_pos_v09', TB=['1','2','3','4','5','6','T'];
+const fmt=n=>'฿'+Math.round(n).toLocaleString('en-US');
+const tname=t=>t==='T'?'กลับบ้าน':'โต๊ะ '+t;
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+const hhmm=()=>{const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+const no4=n=>String(n).padStart(4,'0');
+let S={orders:{},disc:{},bills:[],seq:1};
+try{const r=JSON.parse(localStorage.getItem(K));if(r&&r.orders)S=r}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+let cur='1',cat=-1,tab='menu',qs='';
+const dine=t=>(S.dine&&S.dine[t])||(t==='T'?'take':'in');
+const L=t=>(S.orders[t]||[]).filter(l=>MI(l.id));
+const sub=t=>L(t).reduce((s,l)=>s+MI(l.id).p*l.q,0);
+const dsc=t=>Math.round(sub(t)*(S.disc[t]||0)/100);
+const tot=t=>sub(t)-dsc(t);
+const cnt=t=>L(t).reduce((s,l)=>s+l.q,0);
+
+function add(t,id,d,m){
+ const a=S.orders[t]=S.orders[t]||[], l=a.find(x=>x.id===id&&(x.m||'')===(m||''));
+ if(l){l.q+=d;if(l.q<=0)a.splice(a.indexOf(l),1)}else if(d>0)a.push({id,q:d,m:m||''});
+ if(!a.length){delete S.orders[t];delete S.disc[t];if(S.dine)delete S.dine[t];if(S.open)delete S.open[t]}
+ save();render();
+}
+function toast(x){const e=$('#toast');e.textContent=x;e.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>e.style.opacity=0,1800)}
+function pick(id,cb){
+ const m=MI(id);let s='ปกติ';
+ const draw=()=>{
+  modal(`<div class="row"><b>${m.n}</b><button class="ghost" id="x">ปิด</button></div><p>ความหวาน</p><div class="chips">${SWEET.map(v=>`<button class="chip ${v===s?'on':''}" data-s="${v}">${v}</button>`).join('')}</div><button class="go" id="ok" style="margin-top:16px">เพิ่มลงบิล · ${fmt(m.p)}</button>`);
+  $('#x').onclick=()=>modal('');
+  $$('[data-s]').forEach(b=>b.onclick=()=>{s=b.dataset.s;draw()});
+  $('#ok').onclick=()=>{cb?cb(id,s):add(cur,id,1,s);modal('')};
+ };
+ draw();
+}
+function setTab(x){tab=x;$$('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+x));$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.p===x))}
+function modal(h){$('#modal').innerHTML=h?'<div class="ov"><div class="sheet">'+h+'</div></div>':''}
+
+function render(){
+ $('#tables').innerHTML=TB.map(t=>`<button class="tb ${t===cur?'sel':''} ${cnt(t)?'busy':''}" data-t="${t}"><b>${tname(t)}</b><span>${cnt(t)?fmt(tot(t)):'ว่าง'}</span></button>`).join('');
+ const mine={};L(cur).forEach(l=>mine[l.id]=(mine[l.id]||0)+l.q);
+ $('#items').innerHTML=MENU.filter(m=>qs?m.n.toLowerCase().includes(qs):(cat<0||m.c===cat)).map(m=>tile(m,'data-i',mine[m.id])).join('');
+ const ls=L(cur), n=tot(cur);
+ $('#billhead').innerHTML=`<b>${tname(cur)}</b><button class="ghost" id="bClr" ${ls.length?'':'disabled'}>ล้างบิล</button>`;
+ $('#lines').innerHTML=ls.length?`<div class="dine chips">${[['in','เสริฟในร้าน'],['take','กลับบ้าน']].map(([k,v])=>`<button class="chip ${dine(cur)===k?'on':''}" data-dn="${k}">${v}</button>`).join('')}</div>`+ls.map((l,k)=>{const m=MI(l.id);return `<div class="ln"><div>${m.n}<small>${l.m?l.m+' · ':''}${fmt(m.p)}</small></div><div class="qty"><button data-a="-1" data-k="${k}" aria-label="ลด">−</button><b>${l.q}</b><button data-a="1" data-k="${k}" aria-label="เพิ่ม">+</button></div><div class="lt">${fmt(m.p*l.q)}</div></div>`}).join(''):'<div class="empty">ยังไม่มีรายการ แตะเมนูเพื่อเพิ่ม</div>';
+ $('#totals').innerHTML=`<div class="row"><span>รวม</span><span>${fmt(sub(cur))}</span></div>
+ <div class="row"><span>ส่วนลด</span><div class="chips">${[0,5,10,20].map(d=>`<button class="chip ${(S.disc[cur]||0)===d?'on':''}" data-d="${d}">${d?d+'%':'ไม่มี'}</button>`).join('')}</div></div>
+ <div class="row"><span>สุทธิ</span><span class="net">${fmt(n)}</span></div>
+ <div class="row2"><button class="go" id="bSave" ${n?'':'disabled'}>${S.open&&S.open[cur]?'บันทึก':'เปิดตั๋ว'}</button><button class="go alt" id="bPay" ${n?'':'disabled'}>ชำระเงิน</button></div>`;
+ const bt=$('#tabs [data-p="bill"]');bt.textContent=cnt(cur)?'บิล ('+cnt(cur)+')':'บิล';
+}
+
+document.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.t){cur=b.dataset.t;setTab('menu');render()}
+ else if(b.dataset.c){cat=+b.dataset.c;render()}
+ else if(b.dataset.a){const l=L(cur)[+b.dataset.k];if(l)add(cur,l.id,+b.dataset.a,l.m)}
+ else if(b.dataset.dn){(S.dine=S.dine||{})[cur]=b.dataset.dn;save();render()}
+ else if(b.id==='bSave'){(S.open=S.open||{})[cur]=true;save();toast('บันทึก '+tname(cur)+' แล้ว');if(innerWidth<900)setTab('tables');render()}
+ else if(b.dataset.i&&b.classList.contains('it')){pick(b.dataset.i)}
+ else if(b.dataset.d!==undefined){S.disc[cur]=+b.dataset.d;save();render()}
+ else if(b.dataset.p){setTab(b.dataset.p)}
+ else if(b.id==='bClr'){delete S.orders[cur];delete S.disc[cur];if(S.dine)delete S.dine[cur];if(S.open)delete S.open[cur];save();render()}
+ else if(b.id==='bPay'){pay()}
+ else if(b.id==='bSum'){summary()}
+ else if(b.id==='bQr'){poll().then(inbox)}
+ else if(b.id==='bGen'){gen()}
+ else if(b.id==='bAdm'){location.hash='admin'}
+});
+$('#modal').addEventListener('click',e=>{if(e.target.classList.contains('ov'))modal('')});
+
+function pay(){
+ const t=cur,n=tot(t);if(!n)return;
+ let m='cash',got=n;
+ const M={cash:'เงินสด',pp:'PromptPay',card:'บัตร'};
+ const upd=()=>{const c=$('#chg');if(!c)return;const ok=got>=n;c.textContent=ok?'เงินทอน '+fmt(got-n):'ยังขาด '+fmt(n-got);$('#ok').disabled=!ok};
+ const draw=()=>{
+  modal(`<div class="row"><b>ชำระเงิน · ${tname(t)}</b><button class="ghost" id="x">ปิด</button></div>
+  <div class="net" style="text-align:center;margin:12px 0">${fmt(n)}</div>
+  <div class="chips">${Object.keys(M).map(k=>`<button class="chip ${k===m?'on':''}" data-m="${k}">${M[k]}</button>`).join('')}</div>
+  <div style="margin:14px 0">${m==='cash'?`<input class="in" id="got" type="number" inputmode="numeric" value="${got}"><div class="chips" style="margin-top:8px">${[n,100,500,1000].map((v,i)=>`<button class="chip" data-q="${v}">${i?fmt(v):'ตรงยอด'}</button>`).join('')}</div><p id="chg"></p>`:m==='pp'?'<p>ให้ลูกค้าสแกน PromptPay ของร้าน แล้วกดยืนยันเมื่อเงินเข้า</p>':'<p>รูดบัตรที่เครื่อง EDC แล้วกดยืนยันเมื่อรายการผ่าน</p>'}</div>
+  <button class="go" id="ok">ยืนยันรับเงิน</button>`);
+  $('#x').onclick=()=>modal('');
+  $$('[data-m]').forEach(b=>b.onclick=()=>{m=b.dataset.m;got=n;draw()});
+  if(m==='cash'){
+   $('#got').oninput=e=>{got=+e.target.value||0;upd()};
+   $$('[data-q]').forEach(b=>b.onclick=()=>{got=+b.dataset.q;$('#got').value=got;upd()});
+   upd();
+  }
+  $('#ok').onclick=()=>{
+   const bill={no:S.seq++,t:tname(t),dn:dine(t),d:today(),h:hhmm(),items:L(t).map(l=>({n:MI(l.id).n,p:MI(l.id).p,q:l.q,s:l.m})),sub:sub(t),dc:dsc(t),total:n,m,got:m==='cash'?got:n};
+   S.bills.push(bill);if(S.bills.length>300)S.bills.shift();DB.bill(bill);
+   delete S.orders[t];delete S.disc[t];if(S.dine)delete S.dine[t];if(S.open)delete S.open[t];save();render();receipt(bill);
+  };
+ };
+ draw();
+}
+
+function receipt(b){
+ modal(`<div class="row"><b>ใบเสร็จ #${no4(b.no)}</b><span>${b.t} · ${b.h}</span></div><div class="rc"><span>${b.dn==='take'?'กลับบ้าน':'เสริฟในร้าน'}</span></div><div class="hr"></div>
+ ${b.items.map(i=>`<div class="rc"><span>${i.n}${i.s?' ('+i.s+')':''} × ${i.q}</span><span>${fmt(i.p*i.q)}</span></div>`).join('')}<div class="hr"></div>
+ <div class="rc"><span>รวม</span><span>${fmt(b.sub)}</span></div>
+ ${b.dc?`<div class="rc"><span>ส่วนลด</span><span>−${fmt(b.dc)}</span></div>`:''}
+ <div class="rc"><b>สุทธิ</b><b>${fmt(b.total)}</b></div>
+ <div class="rc"><span>ชำระด้วย</span><span>${{cash:'เงินสด',pp:'PromptPay',card:'บัตร'}[b.m]}</span></div>
+ ${b.m==='cash'&&b.got>b.total?`<div class="rc"><span>เงินทอน</span><span>${fmt(b.got-b.total)}</span></div>`:''}
+ <button class="go" id="done" style="margin-top:14px">เสร็จสิ้น</button>`);
+ $('#done').onclick=()=>modal('');
+}
+
+function summary(){
+ const bs=S.bills.filter(b=>b.d===today()), sum=a=>a.reduce((s,b)=>s+b.total,0);
+ const by=k=>bs.filter(b=>b.m===k);
+ let armed=false;
+ modal(`<div class="row"><b>สรุปยอดวันนี้</b><button class="ghost" id="x">ปิด</button></div>
+ <div class="net" style="margin:10px 0">${fmt(sum(bs))}</div>
+ <div class="rc"><span>จำนวนบิล</span><span>${bs.length}</span></div>
+ <div class="rc"><span>เงินสด</span><span>${fmt(sum(by('cash')))}</span></div>
+ <div class="rc"><span>PromptPay</span><span>${fmt(sum(by('pp')))}</span></div>
+ <div class="rc"><span>บัตร</span><span>${fmt(sum(by('card')))}</span></div><div class="hr"></div>
+ ${bs.length?bs.slice(-8).reverse().map(b=>`<button class="ghost rc" data-n="${b.no}" style="width:100%;margin-bottom:6px"><span>#${no4(b.no)} ${b.t} · ${b.h}</span><span>${fmt(b.total)}</span></button>`).join(''):'<p>วันนี้ยังไม่มีบิล</p>'}
+ <button class="ghost" id="rst" style="width:100%;margin-top:10px" ${bs.length?'':'disabled'}>ล้างข้อมูลวันนี้</button>`);
+ $('#x').onclick=()=>modal('');
+ $$('[data-n]').forEach(b=>b.onclick=()=>receipt(S.bills.find(x=>x.no===+b.dataset.n)));
+ $('#rst').onclick=e=>{
+  if(!armed){armed=true;e.target.textContent='แตะอีกครั้งเพื่อยืนยันการล้าง';return}
+  S.bills=S.bills.filter(b=>b.d!==today());save();summary();
+ };
+}
+
+// ===== ฐานข้อมูลกลาง (POS + QR order ใช้ชุดเดียวกัน) =====
+// ใส่ URL และ anon key ของ Supabase เพื่อใช้ฐานข้อมูลจริง (ว่าง = โหมดทดลอง เก็บในเบราว์เซอร์นี้)
+const CFG={url:'https://tbpcrsdvpmdbjaazeddt.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRicGNyc2R2cG1kYmphYXplZGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MTY2ODUsImV4cCI6MjEwODM5MjY4NX0.h9053eTUXNpg1DNDvU2vLhL5LqELMtLzkeD5P4Dh4y4'};
+const SB=!!(CFG.url&&CFG.key);
+const LK='bhc_qr_orders';
+const lget=()=>{try{return JSON.parse(localStorage.getItem(LK))||[]}catch(e){return[]}};
+const lset=a=>{try{localStorage.setItem(LK,JSON.stringify(a.slice(-100)))}catch(e){}};
+let TK=null;try{TK=JSON.parse(localStorage.getItem('bhc_tk'))}catch(e){}
+const setTK=j=>{TK=j;try{localStorage.setItem('bhc_tk',JSON.stringify(j))}catch(x){}};
+const sbf=(p,o={},auth)=>fetch(CFG.url+p,{...o,headers:{apikey:CFG.key,'Content-Type':'application/json',...(auth&&TK?{Authorization:'Bearer '+TK.access_token}:CFG.key.startsWith('eyJ')?{Authorization:'Bearer '+CFG.key}:{}),...(o.headers||{})}}).then(r=>r.ok?r.text().then(t=>t?JSON.parse(t):null):Promise.reject(r.status));
+const tokf=b=>fetch(CFG.url+'/auth/v1/token?grant_type='+b.g,{method:'POST',headers:{apikey:CFG.key,'Content-Type':'application/json'},body:JSON.stringify(b.d)}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(setTK);
+const MIN={Prefer:'return=minimal'};
+const DB={
+ send:o=>SB?sbf('/rest/v1/orders',{method:'POST',headers:MIN,body:JSON.stringify(o)}):Promise.resolve(lset(lget().concat(o))),
+ status:id=>SB?sbf('/rest/v1/rpc/order_status',{method:'POST',body:JSON.stringify({oid:id})}):Promise.resolve((lget().find(x=>x.id===id)||{}).status),
+ listNew:()=>SB?sbf('/rest/v1/orders?status=eq.new&order=created_at',{},true):Promise.resolve(lget().filter(x=>x.status==='new')),
+ setStatus:(id,s)=>SB?sbf('/rest/v1/orders?id=eq.'+id,{method:'PATCH',headers:MIN,body:JSON.stringify({status:s})},true):Promise.resolve(lset(lget().map(x=>x.id===id?{...x,status:s}:x))),
+ bill:b=>SB?sbf('/rest/v1/bills',{method:'POST',headers:MIN,body:JSON.stringify({no:b.no,table_name:b.t,total:b.total,data:b})},true).catch(()=>{}):Promise.resolve(),
+ menuList:a=>SB?sbf('/rest/v1/menu_items?select=*&order=sort.asc',{},a):Promise.resolve(lmenu()),
+ menuSave:r=>{const A=Array.isArray(r)?r:[r];return SB?sbf('/rest/v1/menu_items?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(A)},true):Promise.resolve(lmenuSet(lmenu().filter(x=>!A.some(y=>y.id===x.id)).concat(A)))},
+ menuDel:id=>SB?sbf('/rest/v1/menu_items?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:MIN},true):Promise.resolve(lmenuSet(lmenu().filter(x=>x.id!==id))),
+ upload:(id,b)=>SB?fetch(CFG.url+'/storage/v1/object/menu-images/'+id+'.jpg',{method:'POST',headers:{apikey:CFG.key,Authorization:'Bearer '+(TK&&TK.access_token),'Content-Type':'image/jpeg','x-upsert':'true'},body:b}).then(r=>r.ok?CFG.url+'/storage/v1/object/public/menu-images/'+id+'.jpg?v='+Date.now():Promise.reject(r.status)):new Promise(res=>{const f=new FileReader();f.onload=()=>res(f.result);f.readAsDataURL(b)}),
+ login:(e,p)=>tokf({g:'password',d:{email:e,password:p}}),
+ refresh:()=>tokf({g:'refresh_token',d:{refresh_token:TK.refresh_token}})
+};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:r&3|8).toString(16)});
+// ข้อมูลจากลูกค้าไม่น่าเชื่อถือ: ใช้เฉพาะ id เมนู จำนวน ความหวาน และราคาจากเมนูของ POS เสมอ
+const clean=o=>({t:String(Math.min(6,Math.max(1,parseInt(o.table_no)||1))),items:(Array.isArray(o.items)?o.items:[]).filter(i=>MI(i.id)).slice(0,30).map(i=>({id:String(i.id),q:Math.min(20,Math.max(1,parseInt(i.q)||1)),s:SWEET.includes(i.s)?i.s:'ปกติ'})),note:String(o.note||'').slice(0,120)});
+// ===== เมนู: รูป + หน้า admin (#admin) =====
+const ADM=location.hash==='#admin';
+const lmenu=()=>{try{return JSON.parse(localStorage.getItem('bhc_menu_local'))||[]}catch(e){return[]}};
+const lmenuSet=a=>{try{localStorage.setItem('bhc_menu_local',JSON.stringify(a))}catch(e){toast('พื้นที่เก็บในเครื่องเต็ม')}};
+const okImg=u=>typeof u==='string'&&/^(https:\/\/|data:image\/(jpeg|png|webp);base64,|img\/)/.test(u);
+const tile=(m,at,q)=>{const im=okImg(m.img);return `<button class="it${im?' im':''}" ${at}="${esc(m.id)}">${im?'<img class="ph" loading="lazy" alt="" src="'+esc(m.img)+'">':''}${q?'<i>'+q+'</i>':''}<span>${m.n}</span><small>${fmt(m.p)}</small></button>`};
+const rowsToMenu=rows=>{const s=rows.slice().sort((a,b)=>(a.sort||0)-(b.sort||0));const cats=Array.from(new Set(s.map(r=>r.cat||'อื่นๆ')));return{cats,items:s.map(r=>[r.id,cats.indexOf(r.cat||'อื่นๆ'),r.name,r.price,r.image||''])}};
+async function loadMenu(){
+ try{const r=await DB.menuList(false);const a=(r||[]).filter(x=>x.active!==false);if(a.length){const j=rowsToMenu(a);setMenu(j);if(SB)try{localStorage.setItem('bhc_menu_cache',JSON.stringify(j))}catch(e){}return}}
+ catch(e){if(SB){try{const c=JSON.parse(localStorage.getItem('bhc_menu_cache'));if(c&&c.items&&c.items.length){setMenu(c);return}}catch(x){}}}
+ try{const r=await fetch('menu.json',{cache:'no-cache'});if(r.ok)setMenu(await r.json())}catch(e){}
+}
+function shrink(file,max,q){return new Promise((res,rej)=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{const s=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*s));c.height=Math.max(1,Math.round(im.height*s));c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?res(b):rej(),'image/jpeg',q)};im.onerror=rej;im.src=u})}
+async function withAuth(fn){try{return await fn()}catch(e){if(e===401&&TK&&TK.refresh_token){try{await DB.refresh()}catch(x){throw 401}return fn()}throw e}}
+let ROWS=[];
+async function adminInit(){
+ $('#aBack').onclick=()=>{location.hash=''};
+ const load=async()=>{
+  try{ROWS=(await withAuth(()=>DB.menuList(true)))||[]}catch(e){if(e===401||e===403){lg=0;needLogin(load);return}toast('โหลดเมนูไม่สำเร็จ');ROWS=[]}
+  aDraw();
+ };
+ if(SB&&!TK){lg=0;needLogin(load);aDraw()}else load();
+}
+function aDraw(){
+ const by={};ROWS.slice().sort((a,b)=>(a.sort||0)-(b.sort||0)).forEach(r=>(by[r.cat]=by[r.cat]||[]).push(r));
+ $('#aBody').innerHTML=(SB?'':'<p>โหมดทดลอง: เมนูและรูปเก็บในเบราว์เซอร์นี้เท่านั้น</p>')
+  +'<div class="row2"><button class="go" id="aNew">+ เพิ่มเมนู</button>'+(ROWS.length?'<span></span>':'<button class="go alt" id="aSeed">นำเข้าเมนูตั้งต้น</button>')+'</div>'
+  +Object.keys(by).map(c=>`<div class="ah">${esc(c)}</div>`+by[c].map(r=>`<button class="ar" data-e="${esc(r.id)}"><span class="th">${okImg(r.image)?'<img alt="" src="'+esc(r.image)+'">':''}</span><span class="nm">${esc(r.name)}${r.active===false?' (ปิดขาย)':''}</span><b>${fmt(r.price)}</b></button>`).join('')).join('');
+ $('#aNew').onclick=()=>aEdit();
+ if($('#aSeed'))$('#aSeed').onclick=seed;
+ $$('[data-e]').forEach(b=>b.onclick=()=>aEdit(ROWS.find(x=>x.id===b.dataset.e)));
+}
+async function seed(){
+ const rows=MENU.map((m,i)=>({id:m.id,cat:CATS[m.c]||'อื่นๆ',name:m.n.replace(/&amp;/g,'&'),price:m.p,image:m.img||null,sort:i+1,active:true}));
+ try{await withAuth(()=>DB.menuSave(rows));ROWS=(await withAuth(()=>DB.menuList(true)))||[];aDraw();toast('นำเข้าแล้ว '+rows.length+' รายการ')}catch(e){toast('นำเข้าไม่สำเร็จ')}
+}
+function aEdit(r){
+ const isNew=!r;
+ r=r?Object.assign({},r):{id:'m'+Date.now().toString(36),cat:(ROWS[ROWS.length-1]||{}).cat||'กาแฟ',name:'',price:0,image:'',sort:ROWS.reduce((m,x)=>Math.max(m,x.sort||0),0)+1,active:true};
+ const cats=Array.from(new Set(ROWS.map(x=>x.cat)));let armed=false;
+ const grab=()=>{r.name=$('#en').value;r.price=+$('#ep').value||0;r.cat=$('#ec').value.trim()||'อื่นๆ';r.sort=+$('#eo').value||0;r.active=$('#ea').checked};
+ const reload=async()=>{ROWS=(await withAuth(()=>DB.menuList(true)))||[];modal('');aDraw()};
+ const d=()=>{
+  modal(`<div class="row"><b>${isNew?'เพิ่มเมนู':'แก้ไขเมนู'}</b><button class="ghost" id="x">ปิด</button></div>
+  <div class="ph2">${okImg(r.image)?'<img alt="" src="'+esc(r.image)+'">':'ยังไม่มีรูป'}</div>
+  <div class="chips"><label class="ghost fl">เลือก / ถ่ายรูป<input id="fi" type="file" accept="image/*" hidden></label><button class="ghost" id="ri">ลบรูป</button></div>
+  <input class="in" id="en" placeholder="ชื่อเมนู" value="${esc(r.name)}">
+  <input class="in" id="ep" type="number" inputmode="numeric" placeholder="ราคา" value="${r.price}">
+  <input class="in" id="ec" list="cl" placeholder="หมวด" value="${esc(r.cat)}"><datalist id="cl">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>
+  <input class="in" id="eo" type="number" inputmode="numeric" placeholder="ลำดับ (เลขน้อยขึ้นก่อน)" value="${r.sort}">
+  <label class="rc"><span>เปิดขาย</span><input id="ea" type="checkbox" ${r.active!==false?'checked':''}></label>
+  <button class="go" id="sv" style="margin-top:10px">บันทึก</button>${isNew?'':'<button class="ghost" id="dl" style="width:100%;margin-top:8px">ลบเมนู</button>'}`);
+  $('#x').onclick=()=>modal('');
+  $('#ri').onclick=()=>{grab();r.image='';d()};
+  $('#fi').onchange=async e=>{const f=e.target.files[0];if(!f)return;grab();toast('กำลังอัปโหลดรูป…');try{const b=await shrink(f,SB?640:360,SB?.8:.7);r.image=await withAuth(()=>DB.upload(r.id,b));d()}catch(x){toast('อัปโหลดรูปไม่สำเร็จ')}};
+  $('#sv').onclick=async()=>{grab();if(!r.name.trim()){toast('ใส่ชื่อเมนู');return}
+   const row={id:r.id,cat:r.cat,name:r.name.trim().slice(0,60),price:Math.max(0,Math.round(r.price)),image:r.image||null,sort:r.sort,active:r.active};
+   try{await withAuth(()=>DB.menuSave(row));await reload();toast('บันทึกแล้ว')}catch(x){toast('บันทึกไม่สำเร็จ')}};
+  if($('#dl'))$('#dl').onclick=async e=>{if(!armed){armed=true;e.target.textContent='แตะอีกครั้งเพื่อลบ';return}try{await withAuth(()=>DB.menuDel(r.id));await reload()}catch(x){toast('ลบไม่สำเร็จ')}};
+ };
+ d();
+}
+// ===== ฝั่งพนักงาน (POS): กล่องออเดอร์ QR =====
+let QN=[],seen=new Set(),seenInit=false,lg=0;
+const beep=()=>{try{navigator.vibrate&&navigator.vibrate(200);const a=new(window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator();o.connect(a.destination);o.frequency.value=880;o.start();o.stop(a.currentTime+.25)}catch(e){}};
+async function poll(){
+ try{QN=await DB.listNew()||[]}catch(e){if(e===401){if(TK&&TK.refresh_token)DB.refresh().then(poll).catch(needLogin);else needLogin()}return}
+ const fresh=QN.filter(o=>!seen.has(o.id));QN.forEach(o=>seen.add(o.id));
+ if(fresh.length&&seenInit){toast('มีออเดอร์ QR ใหม่ · โต๊ะ '+clean(fresh[0]).t);beep()}
+ seenInit=true;$('#qn').textContent=QN.length||'';
+}
+function needLogin(cb){
+ if(Date.now()-lg<60000)return;lg=Date.now();
+ modal(`<b>เข้าสู่ระบบพนักงาน</b><input class="in" id="em" type="email" placeholder="อีเมลพนักงาน" style="font-size:16px;margin:10px 0"><input class="in" id="pw" type="password" placeholder="รหัสผ่าน" style="font-size:16px"><button class="go" id="li" style="margin-top:12px">เข้าสู่ระบบ</button>`);
+ $('#li').onclick=()=>DB.login($('#em').value.trim(),$('#pw').value).then(()=>{modal('');(cb||poll)()}).catch(()=>toast('เข้าสู่ระบบไม่สำเร็จ'));
+}
+function inbox(){
+ const draw=()=>{
+  modal(`<div class="row"><b>ออเดอร์จาก QR (${QN.length})</b><button class="ghost" id="x">ปิด</button></div>`+(QN.length?QN.map(o=>{const c=clean(o);return `<div class="ln" style="grid-template-columns:1fr"><div><b>โต๊ะ ${c.t}</b> · ${esc(String(o.created_at||'').slice(11,16))}<small>${c.items.map(i=>MI(i.id).n+' ('+i.s+') × '+i.q).join('<br>')}${c.note?'<br>หมายเหตุ: '+esc(c.note):''}</small><div class="row2" style="margin-top:8px"><button class="go" data-ac="${esc(o.id)}">รับออเดอร์</button><button class="go alt" data-rj="${esc(o.id)}">ปฏิเสธ</button></div></div></div>`}).join(''):'<p>ยังไม่มีออเดอร์ใหม่</p>'));
+  $('#x').onclick=()=>modal('');
+  const act=(attr,st)=>$$('['+attr+']').forEach(b=>b.onclick=async()=>{
+   const o=QN.find(x=>x.id===b.getAttribute(attr));if(!o)return;
+   try{await DB.setStatus(o.id,st)}catch(e){toast('อัปเดตไม่สำเร็จ ลองอีกครั้ง');return}
+   if(st==='accepted'){const c=clean(o);c.items.forEach(i=>add(c.t,i.id,i.q,i.s));toast('รับออเดอร์ โต๊ะ '+c.t+' แล้ว')}
+   QN=QN.filter(x=>x!==o);$('#qn').textContent=QN.length||'';draw();
+  });
+  act('data-ac','accepted');act('data-rj','rejected');
+ };
+ draw();
+}
+function gen(){
+ const base=()=>(S.base||location.href).split('#')[0];
+ const draw=()=>{
+  const el=$('#qrs');el.innerHTML='';
+  for(let n=1;n<=6;n++){
+   const c=document.createElement('div');c.className='qc';c.innerHTML='<div class="qq"></div><b>โต๊ะ '+n+'</b><small>สแกนเพื่อสั่งเครื่องดื่ม</small>';el.appendChild(c);
+   if(window.QRCode)new QRCode(c.firstChild,{text:base()+'#t'+n,width:150,height:150,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+   else c.firstChild.textContent='ต้องต่ออินเทอร์เน็ตเพื่อสร้าง QR';
+  }
+ };
+ modal(`<div class="row"><b>QR สั่งเครื่องดื่ม 6 โต๊ะ</b><button class="ghost" id="x">ปิด</button></div><p>ลิงก์หน้าสั่งของลูกค้า (ลูกค้าต้องเปิดจากมือถือตัวเองได้)${/localhost|^file:/.test(base())?' ตอนนี้ยังเป็นลิงก์ในเครื่อง ให้ใส่ลิงก์เว็บจริงก่อนพิมพ์':''}</p><input class="in" id="base" style="font-size:15px" value="${esc(base())}"><div class="qrs" id="qrs"></div><button class="go" id="pr" style="margin-top:12px">พิมพ์ QR</button>`);
+ $('#x').onclick=()=>modal('');
+ $('#base').oninput=e=>{S.base=e.target.value.trim();save();draw()};
+ $('#pr').onclick=()=>print();
+ draw();
+}
+// ===== ฝั่งลูกค้า (เปิดจาก QR: #t1 ถึง #t6) =====
+const TNO=(location.hash.match(/^#t([1-6])$/)||[])[1];
+let cart=[],cc=-1,cq='',note='';
+const ctot=()=>cart.reduce((s,l)=>s+MI(l.id).p*l.q,0), ccnt=()=>cart.reduce((s,l)=>s+l.q,0);
+function cartAdd(id,m,d){const l=cart.find(x=>x.id===id&&x.m===m);if(l){l.q+=d;if(l.q<=0)cart.splice(cart.indexOf(l),1)}else if(d>0)cart.push({id,q:d,m});cRender()}
+function cRender(){
+ $('#cItems').innerHTML=MENU.filter(m=>cq?m.n.toLowerCase().includes(cq):(cc<0||m.c===cc)).map(m=>tile(m,'data-ci',cart.filter(l=>l.id===m.id).reduce((s,l)=>s+l.q,0))).join('');
+ $('#cBar').textContent=ccnt()?`ตะกร้า · ${ccnt()} รายการ · ${fmt(ctot())}`:'เลือกเมนูเพื่อเริ่มสั่ง';$('#cBar').disabled=!ccnt();
+}
+function cartView(){
+ const draw=()=>{
+  if(!cart.length){modal('');return}
+  modal(`<div class="row"><b>ตะกร้า · โต๊ะ ${TNO}</b><button class="ghost" id="x">ปิด</button></div>${cart.map((l,k)=>{const m=MI(l.id);return `<div class="ln"><div>${m.n}<small>${l.m} · ${fmt(m.p)}</small></div><div class="qty"><button data-ck="${k}" data-cd="-1" aria-label="ลด">−</button><b>${l.q}</b><button data-ck="${k}" data-cd="1" aria-label="เพิ่ม">+</button></div><div class="lt">${fmt(m.p*l.q)}</div></div>`}).join('')}<input class="in" id="nt" placeholder="หมายเหตุถึงร้าน (ไม่บังคับ)" value="${esc(note)}" style="font-size:16px;margin:10px 0"><div class="row"><span>รวม</span><b class="net">${fmt(ctot())}</b></div><p>ชำระเงินที่เคาน์เตอร์</p><button class="go" id="snd">ส่งออเดอร์</button>`);
+  $('#x').onclick=()=>modal('');
+  $('#nt').oninput=e=>note=e.target.value.slice(0,120);
+  $$('[data-ck]').forEach(b=>b.onclick=()=>{const l=cart[+b.dataset.ck];cartAdd(l.id,l.m,+b.dataset.cd);draw()});
+  $('#snd').onclick=async()=>{
+   const o={id:uid(),table_no:+TNO,items:cart.map(l=>({id:l.id,n:MI(l.id).n,p:MI(l.id).p,q:l.q,s:l.m})),note,total:ctot(),status:'new',created_at:new Date().toISOString()};
+   $('#snd').disabled=true;
+   try{await DB.send(o)}catch(e){$('#snd').disabled=false;toast('ส่งไม่สำเร็จ ลองอีกครั้ง');return}
+   cart=[];note='';cRender();sent(o.id);
+  };
+ };
+ draw();
+}
+function sent(id){
+ const msg={new:'ส่งออเดอร์แล้ว รอร้านยืนยัน…',accepted:'ร้านรับออเดอร์แล้ว กำลังเตรียมเครื่องดื่ม',rejected:'ขออภัย ร้านรับออเดอร์นี้ไม่ได้ กรุณาเรียกพนักงาน'};
+ let h;
+ const draw=s=>{modal(`<b>ออเดอร์ #${id.slice(0,4).toUpperCase()} · โต๊ะ ${TNO}</b><p>${msg[s]||msg.new}</p><button class="go" id="more">สั่งเพิ่ม</button>`);$('#more').onclick=()=>{clearInterval(h);modal('')}};
+ draw('new');
+ h=setInterval(async()=>{try{const s=await DB.status(id);if(s&&s!=='new'){clearInterval(h);draw(s)}}catch(e){}},4000);
+ setTimeout(()=>clearInterval(h),1800000);
+}
+// จุดเชื่อม QR order: POS.addOrder('3',[['ลาเต้',2],['บราวนี่',1]])
+window.POS={version:'0.7',addOrder(t,items){(items||[]).forEach(([n,q])=>{const m=MENU.find(x=>x.n===n);if(m&&TB.includes(String(t)))add(String(t),m.id,q||1)})}};
+
+function boot(){
+addEventListener('hashchange',()=>location.reload());
+$('#catSel').innerHTML=['รายการทั้งหมด'].concat(CATS).map((c,i)=>`<option value="${i-1}">${c}</option>`).join('');
+$('#catSel').onchange=e=>{cat=+e.target.value;qs='';$('#q').value='';render()};
+$('#q').oninput=e=>{qs=e.target.value.trim().toLowerCase();render()};
+setTab('menu');render();
+if(TNO){
+ $('#cT').textContent='โต๊ะ '+TNO;
+ $('#cSel').innerHTML=['รายการทั้งหมด'].concat(CATS).map((c,i)=>`<option value="${i-1}">${c}</option>`).join('');
+ $('#cSel').onchange=e=>{cc=+e.target.value;cq='';$('#cQ').value='';cRender()};
+ $('#cQ').oninput=e=>{cq=e.target.value.trim().toLowerCase();cRender()};
+ $('#cust').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.ci)pick(b.dataset.ci,(id,s)=>cartAdd(id,s,1));else if(b.id==='cBar')cartView()});
+ cRender();
+ addEventListener('hashchange',()=>location.reload());
+}else if(ADM){adminInit()}else{poll();setInterval(poll,4000)}
+}
+Promise.race([loadMenu(),new Promise(r=>setTimeout(r,4000))]).then(boot);
+if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
